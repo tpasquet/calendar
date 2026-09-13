@@ -1,0 +1,8 @@
+# Migrations are run from this image before the app starts (see docker-compose "migrate" service).
+FROM node:22-alpine
+WORKDIR /app
+COPY package.json package-lock.json ./
+RUN npm ci --legacy-peer-deps --omit=dev=false
+COPY prisma ./prisma
+RUN npx prisma generate
+CMD ["npx", "prisma", "migrate", "deploy"]

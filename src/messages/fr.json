@@ -1,0 +1,43 @@
+{
+  "app": {
+    "name": "AT Calendar"
+  },
+  "login": {
+    "title": "Connexion",
+    "email": "Email",
+    "password": "Mot de passe",
+    "submit": "Se connecter",
+    "error": "Email ou mot de passe incorrect"
+  },
+  "calendar": {
+    "month": "Mois",
+    "week": "Semaine",
+    "agenda": "Agenda",
+    "today": "Aujourd'hui",
+    "newEvent": "Nouvel événement",
+    "previous": "Précédent",
+    "next": "Suivant"
+  },
+  "event": {
+    "title": "Titre",
+    "description": "Description",
+    "start": "Début",
+    "end": "Fin",
+    "allDay": "Toute la journée",
+    "category": "Catégorie",
+    "repeat": "Récurrence",
+    "repeatNone": "Ne se répète pas",
+    "repeatDaily": "Tous les jours",
+    "repeatWeekly": "Toutes les semaines",
+    "repeatMonthly": "Tous les mois",
+    "repeatYearly": "Tous les ans",
+    "save": "Enregistrer",
+    "delete": "Supprimer",
+    "cancel": "Annuler"
+  },
+  "nav": {
+    "settings": "Réglages",
+    "logout": "Déconnexion",
+    "exportIcs": "Exporter (.ics)"
+  }
+}

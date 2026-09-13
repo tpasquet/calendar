@@ -1,0 +1,12 @@
+{
+  "name": "AT Calendar",
+  "short_name": "AT Calendar",
+  "description": "Calendrier partagé pour Aurélie et Terry",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#6366f1",
+  "icons": [
+    { "src": "/icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
