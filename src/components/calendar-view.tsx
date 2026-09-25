@@ -34,6 +34,13 @@ type Occurrence = {
   };
 };
 
+type CalendarMember = {
+  id: string;
+  email: string;
+  name: string;
+  color: string;
+};
+
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 export function CalendarView() {
@@ -47,6 +54,12 @@ export function CalendarView() {
     };
   });
   const [view, setView] = useState<View>("month");
+  const [calendarDate, setCalendarDate] = useState(() => new Date());
+  const [visibleMemberIds, setVisibleMemberIds] = useState<string[] | null>(() => {
+    if (typeof window === "undefined") return null;
+    const stored = window.localStorage.getItem("atcalendar-visible-members");
+    return stored ? (JSON.parse(stored) as string[]) : null;
+  });
   const [selected, setSelected] = useState<CalendarEvent | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
 
@@ -54,19 +67,34 @@ export function CalendarView() {
     `/api/events?from=${range.from.toISOString()}&to=${range.to.toISOString()}`,
     fetcher,
   );
+  const { data: membersData } = useSWR<{ members: CalendarMember[] }>("/api/calendar-members", fetcher);
+  const members = useMemo(() => membersData?.members ?? [], [membersData]);
+  const selectedMemberIds = visibleMemberIds ?? members.map((member) => member.id);
 
   const events = useMemo(
     () =>
-      (data?.occurrences ?? []).map((occ) => ({
+      (data?.occurrences ?? [])
+        .filter((occ) => selectedMemberIds.includes(occ.event.owner.id))
+        .map((occ) => ({
         id: occ.eventId,
         title: occ.event.title,
         start: new Date(occ.startsAt),
         end: new Date(occ.endsAt),
         allDay: occ.event.allDay,
         resource: occ.event,
-      })),
-    [data],
+        })),
+    [data, selectedMemberIds],
   );
+
+  const toggleMember = useCallback((memberId: string) => {
+    setVisibleMemberIds((current) => {
+      const next = (current ?? members.map((member) => member.id)).includes(memberId)
+        ? (current ?? members.map((member) => member.id)).filter((id) => id !== memberId)
+        : [...(current ?? members.map((member) => member.id)), memberId];
+      window.localStorage.setItem("atcalendar-visible-members", JSON.stringify(next));
+      return next;
+    });
+  }, [members]);
 
   type CalendarViewEvent = (typeof events)[number];
 
@@ -108,13 +136,29 @@ export function CalendarView() {
 
   return (
     <div className="h-[80vh]">
-      <button
-        type="button"
-        onClick={() => handleSelectSlot({ start: new Date(), end: new Date(), slots: [], action: "click" })}
-        className="mb-3 rounded-md bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-700"
-      >
-        + {t("newEvent")}
-      </button>
+      <div className="mb-3 flex flex-wrap items-center gap-3">
+        <button
+          type="button"
+          onClick={() => handleSelectSlot({ start: new Date(), end: new Date(), slots: [], action: "click" })}
+          className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-700"
+        >
+          + {t("newEvent")}
+        </button>
+        <fieldset className="flex flex-wrap items-center gap-3" aria-label={t("calendars")}>
+          <legend className="sr-only">{t("calendars")}</legend>
+          {members.map((member) => (
+            <label key={member.id} className="flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                checked={selectedMemberIds.includes(member.id)}
+                onChange={() => toggleMember(member.id)}
+              />
+              <span className="h-3 w-3 rounded-full" style={{ backgroundColor: member.color }} />
+              {member.name}
+            </label>
+          ))}
+        </fieldset>
+      </div>
 
       <Calendar
         localizer={localizer}
@@ -122,6 +166,8 @@ export function CalendarView() {
         events={events}
         startAccessor="start"
         endAccessor="end"
+        date={calendarDate}
+        onNavigate={setCalendarDate}
         view={view}
         onView={setView}
         views={["month", "week", "agenda"]}

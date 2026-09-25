@@ -7,7 +7,7 @@ export const eventInputSchema = z.object({
   endsAt: z.string().datetime(),
   allDay: z.boolean().default(false),
   rrule: z.string().max(500).optional().nullable(),
-  categoryId: z.string().cuid().optional().nullable(),
+  categoryId: z.string().min(1).optional().nullable(),
 });
 
 export type EventInput = z.infer<typeof eventInputSchema>;

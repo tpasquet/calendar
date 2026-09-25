@@ -1,6 +1,8 @@
-name: Build and publish Docker image
+name: CI/CD
 
 on:
+  pull_request:
+  workflow_dispatch:
   push:
     branches: [main]
     tags: ["v*.*.*"]
@@ -10,7 +12,65 @@ env:
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
+  validate:
+    name: Validate application
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: atcalendar
+          POSTGRES_PASSWORD: changeme
+          POSTGRES_DB: atcalendar
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U atcalendar -d atcalendar"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql://atcalendar:changeme@localhost:5432/atcalendar?schema=public
+      AUTH_SECRET: ci-only-secret
+      NEXTAUTH_URL: http://localhost:3000
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps
+
+      - name: Generate Prisma client
+        run: npx prisma generate
+
+      - name: Apply database migrations
+        run: npx prisma migrate deploy
+
+      - name: Seed test users
+        run: npm run db:seed
+
+      - name: Typecheck
+        run: npx tsc --noEmit
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Integration tests
+        run: npm test
+
+      - name: Build application
+        run: npm run build
+
   build-and-push:
+    name: Publish Docker images
+    needs: validate
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v'))
     runs-on: ubuntu-latest
     permissions:
       contents: read
