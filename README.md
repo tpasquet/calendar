@@ -18,7 +18,7 @@ notifications push, import/export `.ics`.
 
 ```bash
 npm install
-docker run -d --name atcalendar-db -e POSTGRES_USER=atcalendar -e POSTGRES_PASSWORD=changeme -e POSTGRES_DB=atcalendar -p 5432:5432 postgres:16-alpine
+docker run -d --name atcalendrier-db -e POSTGRES_USER=atcalendrier -e POSTGRES_PASSWORD=changeme -e POSTGRES_DB=atcalendrier -p 5432:5432 postgres:16-alpine
 
 cp .env.example .env   # déjà fait, ajuste si besoin
 npx prisma migrate dev --name init
@@ -26,7 +26,7 @@ npm run db:seed        # crée les 2 comptes (voir variables SEED_* ci-dessous)
 npm run dev
 ```
 
-Comptes de dev par défaut : `aurelie@atcalendar.fr` / `terry@atcalendar.fr`, mot de passe `changeme`
+Comptes de dev par défaut : `aurelie@atcalendrier.fr` / `terry@atcalendrier.fr`, mot de passe `changeme`
 (personnalisables via `SEED_AURELIE_EMAIL`, `SEED_AURELIE_PASSWORD`, `SEED_TERRY_EMAIL`,
 `SEED_TERRY_PASSWORD`).
 
@@ -41,7 +41,7 @@ et renseigne `VAPID_PUBLIC_KEY` / `VAPID_PRIVATE_KEY` / `NEXT_PUBLIC_VAPID_PUBLI
 ## Déploiement (VPS + Docker Compose)
 
 1. Crée le repo sur GitHub, pousse le code : la CI (`.github/workflows/docker-publish.yml`)
-   construit et publie automatiquement `ghcr.io/<owner>/atcalendar` (+ variante `-migrate`)
+   construit et publie automatiquement `ghcr.io/<owner>/atcalendrier` (+ variante `-migrate`)
    à chaque push sur `main` ou tag `vX.Y.Z`.
 2. Sur le VPS : installe Docker (ou Podman + `podman-compose`), copie `docker-compose.yml`,
    `Caddyfile`, `backup/` et un fichier `.env` basé sur `.env.production.example`.
@@ -50,8 +50,8 @@ et renseigne `VAPID_PUBLIC_KEY` / `VAPID_PRIVATE_KEY` / `NEXT_PUBLIC_VAPID_PUBLI
 4. `docker compose up -d` — Watchtower surveille `ghcr.io` toutes les 5 minutes et redéploie
    automatiquement les nouvelles images (label `com.centurylinklabs.watchtower.enable=true`
    sur le service `app`).
-5. Pointe le DNS de `atcalendar.fr` vers le VPS ; Caddy obtient et renouvelle le certificat
-   HTTPS automatiquement (`DOMAIN=atcalendar.fr` dans `.env`).
+5. Pointe le DNS de `atcalendrier.fr` vers le VPS ; Caddy obtient et renouvelle le certificat
+   HTTPS automatiquement (`DOMAIN=atcalendrier.fr` dans `.env`).
 
 Les sauvegardes PostgreSQL (`pg_dump` compressé) sont écrites dans `./backups` toutes les 24h
 (configurable via `BACKUP_INTERVAL_SECONDS` / `BACKUP_RETENTION_DAYS`).

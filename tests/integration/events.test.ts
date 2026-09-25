@@ -18,11 +18,11 @@ const { PATCH, DELETE } = await import("@/app/api/events/[id]/route");
 describe("events API integration", () => {
   beforeAll(async () => {
     const user = await prisma.user.findUnique({
-      where: { email: "terry@atcalendar.fr" },
+      where: { email: "terry@atcalendrier.fr" },
       select: { id: true },
     });
 
-    if (!user) throw new Error("Seed terry@atcalendar.fr before running integration tests");
+    if (!user) throw new Error("Seed terry@atcalendrier.fr before running integration tests");
     userId = user.id;
   });
 

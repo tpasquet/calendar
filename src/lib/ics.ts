@@ -18,13 +18,13 @@ export function buildIcsCalendar(events: IcsEvent[]): string {
   const lines: string[] = [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
-    "PRODID:-//atcalendar//atcalendar//FR",
+    "PRODID:-//atcalendrier//atcalendrier//FR",
     "CALSCALE:GREGORIAN",
   ];
 
   for (const event of events) {
     lines.push("BEGIN:VEVENT");
-    lines.push(`UID:${event.id}@atcalendar.fr`);
+    lines.push(`UID:${event.id}@atcalendrier.fr`);
     lines.push(`DTSTAMP:${formatIcsDate(event.createdAt, false)}`);
     lines.push(
       `DTSTART${event.allDay ? ";VALUE=DATE" : ""}:${formatIcsDate(event.startsAt, event.allDay)}`,

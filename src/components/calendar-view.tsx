@@ -57,7 +57,7 @@ export function CalendarView() {
   const [calendarDate, setCalendarDate] = useState(() => new Date());
   const [visibleMemberIds, setVisibleMemberIds] = useState<string[] | null>(() => {
     if (typeof window === "undefined") return null;
-    const stored = window.localStorage.getItem("atcalendar-visible-members");
+    const stored = window.localStorage.getItem("atcalendrier-visible-members");
     return stored ? (JSON.parse(stored) as string[]) : null;
   });
   const [selected, setSelected] = useState<CalendarEvent | null>(null);
@@ -91,7 +91,7 @@ export function CalendarView() {
       const next = (current ?? members.map((member) => member.id)).includes(memberId)
         ? (current ?? members.map((member) => member.id)).filter((id) => id !== memberId)
         : [...(current ?? members.map((member) => member.id)), memberId];
-      window.localStorage.setItem("atcalendar-visible-members", JSON.stringify(next));
+      window.localStorage.setItem("atcalendrier-visible-members", JSON.stringify(next));
       return next;
     });
   }, [members]);

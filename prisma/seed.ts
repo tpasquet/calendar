@@ -24,14 +24,14 @@ async function upsertUser(email: string, name: string, password: string, color: 
 
 async function main() {
   await upsertUser(
-    process.env.SEED_AURELIE_EMAIL ?? "aurelie@atcalendar.fr",
+    process.env.SEED_AURELIE_EMAIL ?? "aurelie@atcalendrier.fr",
     "Aurélie",
     process.env.SEED_AURELIE_PASSWORD ?? "changeme",
     "#ec4899",
   );
 
   await upsertUser(
-    process.env.SEED_TERRY_EMAIL ?? "terry@atcalendar.fr",
+    process.env.SEED_TERRY_EMAIL ?? "terry@atcalendrier.fr",
     "Terry",
     process.env.SEED_TERRY_PASSWORD ?? "changeme",
     "#6366f1",

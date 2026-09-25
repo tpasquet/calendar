@@ -2,7 +2,7 @@ import webpush from "web-push";
 
 const publicKey = process.env.VAPID_PUBLIC_KEY;
 const privateKey = process.env.VAPID_PRIVATE_KEY;
-const subject = process.env.VAPID_SUBJECT ?? "mailto:contact@atcalendar.fr";
+const subject = process.env.VAPID_SUBJECT ?? "mailto:contact@atcalendrier.fr";
 
 if (publicKey && privateKey) {
   webpush.setVapidDetails(subject, publicKey, privateKey);

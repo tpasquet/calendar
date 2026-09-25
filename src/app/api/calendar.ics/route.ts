@@ -16,7 +16,7 @@ export async function GET() {
   return new Response(ics, {
     headers: {
       "Content-Type": "text/calendar; charset=utf-8",
-      "Content-Disposition": 'attachment; filename="atcalendar.ics"',
+      "Content-Disposition": 'attachment; filename="atcalendrier.ics"',
     },
   });
 }

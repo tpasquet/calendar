@@ -19,18 +19,18 @@ jobs:
       postgres:
         image: postgres:16-alpine
         env:
-          POSTGRES_USER: atcalendar
+          POSTGRES_USER: atcalendrier
           POSTGRES_PASSWORD: changeme
-          POSTGRES_DB: atcalendar
+          POSTGRES_DB: atcalendrier
         ports:
           - 5432:5432
         options: >-
-          --health-cmd "pg_isready -U atcalendar -d atcalendar"
+          --health-cmd "pg_isready -U atcalendrier -d atcalendrier"
           --health-interval 5s
           --health-timeout 5s
           --health-retries 10
     env:
-      DATABASE_URL: postgresql://atcalendar:changeme@localhost:5432/atcalendar?schema=public
+      DATABASE_URL: postgresql://atcalendrier:changeme@localhost:5432/atcalendrier?schema=public
       AUTH_SECRET: ci-only-secret
       NEXTAUTH_URL: http://localhost:3000
     steps:

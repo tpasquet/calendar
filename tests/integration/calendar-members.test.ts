@@ -16,10 +16,10 @@ const sessionUser = { id: "test-user" };
 describe("calendar members API integration", () => {
   beforeAll(async () => {
     const user = await prisma.user.findUnique({
-      where: { email: "terry@atcalendar.fr" },
+      where: { email: "terry@atcalendrier.fr" },
       select: { id: true },
     });
-    if (!user) throw new Error("Seed terry@atcalendar.fr before running integration tests");
+    if (!user) throw new Error("Seed terry@atcalendrier.fr before running integration tests");
     sessionUser.id = user.id;
     getServerSessionMock.mockResolvedValue({ user: sessionUser });
   });
@@ -36,8 +36,8 @@ describe("calendar members API integration", () => {
     expect(members).toHaveLength(2);
     expect(members).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({ email: "terry@atcalendar.fr", name: "Terry", color: expect.any(String) }),
-        expect.objectContaining({ email: "aurelie@atcalendar.fr", name: "Aurélie", color: expect.any(String) }),
+        expect.objectContaining({ email: "terry@atcalendrier.fr", name: "Terry", color: expect.any(String) }),
+        expect.objectContaining({ email: "aurelie@atcalendrier.fr", name: "Aurélie", color: expect.any(String) }),
       ]),
     );
   });
