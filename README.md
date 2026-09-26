@@ -42,7 +42,7 @@ et renseigne `VAPID_PUBLIC_KEY` / `VAPID_PRIVATE_KEY` / `NEXT_PUBLIC_VAPID_PUBLI
 
 1. Crée le repo sur GitHub, pousse le code : la CI (`.github/workflows/docker-publish.yml`)
    construit et publie automatiquement `ghcr.io/<owner>/atcalendrier` (+ variante `-migrate`)
-   à chaque push sur `main` ou tag `vX.Y.Z`.
+   à chaque push sur `master` ou tag `vX.Y.Z`.
 2. Sur le VPS : installe Docker (ou Podman + `podman-compose`), copie `docker-compose.yml`,
    `Caddyfile`, `backup/` et un fichier `.env` basé sur `.env.production.example`.
 3. Authentifie le VPS auprès de `ghcr.io` si le paquet est privé :
