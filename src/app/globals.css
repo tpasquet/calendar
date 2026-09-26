@@ -30,3 +30,8 @@ body {
   color: inherit;
 }
 
+.rbc-month-view .rbc-off-range .rbc-button-link,
+.rbc-month-view .rbc-off-range.rbc-button-link {
+  visibility: hidden;
+}
+

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { RRule } from "rrule";
 import { useTranslations } from "next-intl";
 import useSWR from "swr";
@@ -60,6 +60,16 @@ export function EventModal({
 }) {
   const t = useTranslations("event");
   const { data: categoriesData } = useSWR<{ categories: Category[] }>("/api/categories", fetcher);
+  const categories = useMemo(() => {
+    const uniqueCategories = new Map<string, Category>();
+    for (const category of categoriesData?.categories ?? []) {
+      const existing = uniqueCategories.get(category.name);
+      if (!existing || category.id === event.categoryId) {
+        uniqueCategories.set(category.name, category);
+      }
+    }
+    return [...uniqueCategories.values()];
+  }, [categoriesData, event.categoryId]);
 
   const [title, setTitle] = useState(event.title);
   const [description, setDescription] = useState(event.description);
@@ -162,7 +172,7 @@ export function EventModal({
             className="w-full rounded-md border border-black/20 dark:border-white/20 bg-transparent px-2 py-1"
           >
             <option value="">—</option>
-            {categoriesData?.categories.map((cat) => (
+            {categories.map((cat) => (
               <option key={cat.id} value={cat.id}>
                 {cat.name}
               </option>

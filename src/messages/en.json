@@ -1,6 +1,6 @@
 {
   "app": {
-    "name": "AT Calendar"
+    "name": "Calendar"
   },
   "login": {
     "title": "Sign in",
@@ -10,9 +10,11 @@
     "error": "Invalid email or password"
   },
   "calendar": {
+    "day": "Day",
     "month": "Month",
     "week": "Week",
     "agenda": "Agenda",
+    "viewModes": "View",
     "today": "Today",
     "newEvent": "New event",
     "calendars": "Calendars",
@@ -37,7 +39,12 @@
     "cancel": "Cancel"
   },
   "nav": {
+    "menu": "Main menu",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
     "settings": "Settings",
+    "toggleTheme": "Toggle theme",
+    "backToCalendar": "Back to calendar",
     "logout": "Log out",
     "exportIcs": "Export (.ics)"
   }

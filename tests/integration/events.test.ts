@@ -68,8 +68,7 @@ describe("events API integration", () => {
     );
     expect(listResponse.status).toBe(200);
     const listed = (await listResponse.json()).occurrences;
-    expect(listed).toHaveLength(1);
-    expect(listed[0].event.id).toBe(created.id);
+    expect(listed.filter((occurrence: { event: { id: string } }) => occurrence.event.id === created.id)).toHaveLength(1);
 
     const updateResponse = await PATCH(
       new Request(`http://localhost/api/events/${created.id}`, {

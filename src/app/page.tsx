@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { CalendarView } from "@/components/calendar-view";
 import { NavBar } from "@/components/nav-bar";
+import { CalendarPreferencesProvider } from "@/components/calendar-preferences";
 
 export default async function HomePage() {
   const session = await getServerSession(authOptions);
@@ -11,11 +12,13 @@ export default async function HomePage() {
   }
 
   return (
-    <div className="flex min-h-full flex-1 flex-col">
-      <NavBar />
-      <main className="flex-1 p-4">
-        <CalendarView />
-      </main>
-    </div>
+    <CalendarPreferencesProvider>
+      <div className="flex min-h-full flex-1 flex-col">
+        <NavBar />
+        <main className="flex-1 p-4">
+          <CalendarView />
+        </main>
+      </div>
+    </CalendarPreferencesProvider>
   );
 }

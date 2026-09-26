@@ -1,12 +1,13 @@
 "use client";
 
 import { useCallback, useMemo, useState } from "react";
-import { Calendar, dateFnsLocalizer, type SlotInfo, type View } from "react-big-calendar";
+import { Calendar, dateFnsLocalizer, type NavigateAction, type SlotInfo } from "react-big-calendar";
 import { format, parse, startOfWeek, getDay } from "date-fns";
 import { fr, enUS } from "date-fns/locale";
 import { useLocale, useTranslations } from "next-intl";
 import useSWR from "swr";
 import { EventModal, type CalendarEvent } from "@/components/event-modal";
+import { useCalendarPreferences } from "@/components/calendar-preferences";
 
 const locales = { fr, en: enUS };
 
@@ -17,6 +18,73 @@ const localizer = dateFnsLocalizer({
   getDay,
   locales,
 });
+
+const fetcher = (url: string) => fetch(url).then((res) => res.json());
+const shortWeekday = (value: Date) => {
+  const weekday = format(value, "EEEEEE", { locale: fr });
+  return `${weekday.charAt(0).toUpperCase()}${weekday.slice(1)}.`;
+};
+
+const calendarFormats = {
+  dateFormat: "d",
+  dayFormat: (date: Date) => `${shortWeekday(date)} ${format(date, "d", { locale: fr })}`,
+  monthHeaderFormat: "MMMM yyyy",
+  dayHeaderFormat: "EEEE dd/MM",
+  weekdayFormat: (date: Date) => shortWeekday(date),
+  agendaDateFormat: "dd/MM/yyyy",
+  agendaTimeFormat: "HH:mm",
+  timeGutterFormat: "HH:mm",
+};
+
+type CalendarToolbarProps = {
+  label: string;
+  onNavigate: (action: NavigateAction) => void;
+  onNewEvent: () => void;
+};
+
+function CalendarToolbar({ label, onNavigate, onNewEvent }: CalendarToolbarProps) {
+  const t = useTranslations("calendar");
+
+  return (
+    <div className="mb-3 flex items-center justify-between gap-3">
+      <div className="flex gap-1">
+        <button
+          type="button"
+          aria-label={t("previous")}
+          title={t("previous")}
+          onClick={() => onNavigate("PREV")}
+          className="rbc-btn-group rounded-md border px-3 py-1 text-lg leading-none"
+        >
+          ←
+        </button>
+        <button type="button" onClick={() => onNavigate("TODAY")} className="rbc-btn-group rounded-md border px-3 py-1 text-sm">
+          {t("today")}
+        </button>
+        <button
+          type="button"
+          aria-label={t("next")}
+          title={t("next")}
+          onClick={() => onNavigate("NEXT")}
+          className="rbc-btn-group rounded-md border px-3 py-1 text-lg leading-none"
+        >
+          →
+        </button>
+      </div>
+      <div className="flex items-center gap-3">
+        <strong className="text-sm font-semibold">{label}</strong>
+        <button
+          type="button"
+          aria-label={t("newEvent")}
+          title={t("newEvent")}
+          onClick={onNewEvent}
+          className="flex h-10 w-10 items-center justify-center rounded-full bg-indigo-600 text-2xl font-light leading-none text-white hover:bg-indigo-700"
+        >
+          +
+        </button>
+      </div>
+    </div>
+  );
+}
 
 type Occurrence = {
   eventId: string;
@@ -34,18 +102,10 @@ type Occurrence = {
   };
 };
 
-type CalendarMember = {
-  id: string;
-  email: string;
-  name: string;
-  color: string;
-};
-
-const fetcher = (url: string) => fetch(url).then((res) => res.json());
-
 export function CalendarView() {
   const t = useTranslations("calendar");
   const locale = useLocale();
+  const { view, setView, selectedMemberIds } = useCalendarPreferences();
   const [range, setRange] = useState(() => {
     const now = new Date();
     return {
@@ -53,13 +113,7 @@ export function CalendarView() {
       to: new Date(now.getFullYear(), now.getMonth() + 2, 0),
     };
   });
-  const [view, setView] = useState<View>("month");
   const [calendarDate, setCalendarDate] = useState(() => new Date());
-  const [visibleMemberIds, setVisibleMemberIds] = useState<string[] | null>(() => {
-    if (typeof window === "undefined") return null;
-    const stored = window.localStorage.getItem("atcalendrier-visible-members");
-    return stored ? (JSON.parse(stored) as string[]) : null;
-  });
   const [selected, setSelected] = useState<CalendarEvent | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
 
@@ -67,9 +121,6 @@ export function CalendarView() {
     `/api/events?from=${range.from.toISOString()}&to=${range.to.toISOString()}`,
     fetcher,
   );
-  const { data: membersData } = useSWR<{ members: CalendarMember[] }>("/api/calendar-members", fetcher);
-  const members = useMemo(() => membersData?.members ?? [], [membersData]);
-  const selectedMemberIds = visibleMemberIds ?? members.map((member) => member.id);
 
   const events = useMemo(
     () =>
@@ -85,16 +136,6 @@ export function CalendarView() {
         })),
     [data, selectedMemberIds],
   );
-
-  const toggleMember = useCallback((memberId: string) => {
-    setVisibleMemberIds((current) => {
-      const next = (current ?? members.map((member) => member.id)).includes(memberId)
-        ? (current ?? members.map((member) => member.id)).filter((id) => id !== memberId)
-        : [...(current ?? members.map((member) => member.id)), memberId];
-      window.localStorage.setItem("atcalendrier-visible-members", JSON.stringify(next));
-      return next;
-    });
-  }, [members]);
 
   type CalendarViewEvent = (typeof events)[number];
 
@@ -136,30 +177,6 @@ export function CalendarView() {
 
   return (
     <div className="h-[80vh]">
-      <div className="mb-3 flex flex-wrap items-center gap-3">
-        <button
-          type="button"
-          onClick={() => handleSelectSlot({ start: new Date(), end: new Date(), slots: [], action: "click" })}
-          className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-700"
-        >
-          + {t("newEvent")}
-        </button>
-        <fieldset className="flex flex-wrap items-center gap-3" aria-label={t("calendars")}>
-          <legend className="sr-only">{t("calendars")}</legend>
-          {members.map((member) => (
-            <label key={member.id} className="flex items-center gap-2 text-sm">
-              <input
-                type="checkbox"
-                checked={selectedMemberIds.includes(member.id)}
-                onChange={() => toggleMember(member.id)}
-              />
-              <span className="h-3 w-3 rounded-full" style={{ backgroundColor: member.color }} />
-              {member.name}
-            </label>
-          ))}
-        </fieldset>
-      </div>
-
       <Calendar
         localizer={localizer}
         culture={locale}
@@ -170,11 +187,23 @@ export function CalendarView() {
         onNavigate={setCalendarDate}
         view={view}
         onView={setView}
-        views={["month", "week", "agenda"]}
+        views={["day", "month", "week", "agenda"]}
+        formats={calendarFormats}
         onRangeChange={handleRangeChange}
         selectable
         onSelectSlot={handleSelectSlot}
         onSelectEvent={handleSelectEvent}
+        components={{
+          toolbar: (toolbarProps) => (
+            <CalendarToolbar
+              label={toolbarProps.label}
+              onNavigate={toolbarProps.onNavigate}
+              onNewEvent={() =>
+                handleSelectSlot({ start: new Date(), end: new Date(), slots: [], action: "click" })
+              }
+            />
+          ),
+        }}
         eventPropGetter={(event: CalendarViewEvent) => ({
           style: {
             backgroundColor: event.resource.category?.color ?? event.resource.owner.color,

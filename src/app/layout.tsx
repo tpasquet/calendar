@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "AT Calendar",
+  title: "Calendrier",
   description: "Calendrier partagé pour Aurélie et Terry",
   manifest: "/manifest.webmanifest",
 };
